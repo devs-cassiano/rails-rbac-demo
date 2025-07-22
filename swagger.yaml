@@ -1,0 +1,133 @@
+openapi: 3.0.3
+info:
+  title: Rails RBAC Demo API
+  version: 1.0.0
+  description: API para gerenciamento de usuários com controle de acesso baseado em roles.
+servers:
+  - url: http://localhost:3000
+paths:
+  /users:
+    get:
+      summary: Lista todos os usuários
+      tags: [Users]
+      responses:
+        '200':
+          description: Lista de usuários
+    post:
+      summary: Cria um novo usuário
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '201':
+          description: Usuário criado
+        '422':
+          description: Erro de validação
+  /users/{id}:
+    get:
+      summary: Busca um usuário pelo ID
+      tags: [Users]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Usuário encontrado
+        '404':
+          description: Não encontrado
+    put:
+      summary: Atualiza dados do usuário
+      tags: [Users]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '200':
+          description: Usuário atualizado
+        '403':
+          description: Não autorizado
+        '422':
+          description: Erro de validação
+    delete:
+      summary: Remove um usuário
+      tags: [Users]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Removido com sucesso
+        '403':
+          description: Não autorizado
+  /users/{id}/update_role:
+    patch:
+      summary: Atualiza a role do usuário
+      tags: [Users]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    role:
+                      type: string
+      responses:
+        '200':
+          description: Role atualizada
+        '403':
+          description: Não autorizado
+        '422':
+          description: Erro de validação
+components:
+  schemas:
+    UserInput:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            name:
+              type: string
+            username:
+              type: string
+            email:
+              type: string
+            password:
+              type: string
+            role:
+              type: string
+      required:
+        - name
+        - username
+        - email
+        - password
+        - role

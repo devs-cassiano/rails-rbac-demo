@@ -1,0 +1,41 @@
+<h1>Login</h1>
+<form id="login-form">
+  <label>Email: <input type="email" name="email" required></label><br>
+  <label>Senha: <input type="password" name="password" required></label><br>
+  <button type="submit">Entrar</button>
+</form>
+<div id="login-result"></div>
+<script>
+document.getElementById('login-form').onsubmit = async function(e) {
+  e.preventDefault();
+  const email = this.email.value;
+  const password = this.password.value;
+  const res = await fetch('/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  const data = await res.json();
+  if (res.ok) {
+    localStorage.setItem('jwt', data.token);
+    // Decodifica o JWT para pegar a role
+    const payload = JSON.parse(atob(data.token.split('.')[1]));
+    // Busca o usuário autenticado na API para pegar a role
+    const userRes = await fetch(`/users/${payload.user_id}`, {
+      headers: { 'Authorization': 'Bearer ' + data.token }
+    });
+    if (userRes.ok) {
+      const user = await userRes.json();
+      if (user.role === 'user') {
+        window.location.href = '/user_home';
+      } else {
+        window.location.href = '/users_list';
+      }
+    } else {
+      document.getElementById('login-result').innerText = 'Erro ao buscar usuário';
+    }
+  } else {
+    document.getElementById('login-result').innerText = data.error || 'Erro ao autenticar';
+  }
+};
+</script>

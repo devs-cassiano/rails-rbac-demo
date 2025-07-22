@@ -1,0 +1,27 @@
+<h1 id="welcome"></h1>
+<script>
+(async function() {
+  const jwt = localStorage.getItem('jwt');
+  if (!jwt) {
+    window.location.href = '/login';
+    return;
+  }
+  // Decodifica o JWT para pegar o user_id
+  const payload = JSON.parse(atob(jwt.split('.')[1]));
+  const userId = payload.user_id;
+  // Busca apenas o próprio usuário
+  const res = await fetch(`/users/${userId}`, {
+    headers: { 'Authorization': 'Bearer ' + jwt }
+  });
+  if (!res.ok) {
+    window.location.href = '/login';
+    return;
+  }
+  const user = await res.json();
+  if (user.role === 'user') {
+    document.getElementById('welcome').innerText = 'Bem-vindo user';
+  } else {
+    window.location.href = '/users_list';
+  }
+})();
+</script>

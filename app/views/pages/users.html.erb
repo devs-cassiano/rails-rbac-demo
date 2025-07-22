@@ -1,0 +1,66 @@
+<h1>Usuários</h1>
+<button onclick="loadUsers()">Atualizar Lista</button>
+<table border="1" id="users-table">
+  <thead>
+    <tr><th>ID</th><th>Nome</th><th>Username</th><th>Email</th><th>Role</th><th>Ações</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+<div id="user-actions"></div>
+<script>
+async function loadUsers() {
+  const jwt = localStorage.getItem('jwt');
+  const res = await fetch('/users', {
+    headers: { 'Authorization': 'Bearer ' + jwt }
+  });
+  const users = await res.json();
+  const tbody = document.querySelector('#users-table tbody');
+  tbody.innerHTML = '';
+  users.forEach(user => {
+    tbody.innerHTML += `<tr>
+      <td>${user.id}</td>
+      <td><input value="${user.name}" id="name-${user.id}"></td>
+      <td><input value="${user.username}" id="username-${user.id}"></td>
+      <td><input value="${user.email}" id="email-${user.id}"></td>
+      <td><input value="${user.role}" id="role-${user.id}"></td>
+      <td>
+        <button onclick="updateUser(${user.id})">Atualizar</button>
+        <button onclick="deleteUser(${user.id})">Excluir</button>
+      </td>
+    </tr>`;
+  });
+}
+
+async function updateUser(id) {
+  const jwt = localStorage.getItem('jwt');
+  const user = {
+    name: document.getElementById(`name-${id}`).value,
+    username: document.getElementById(`username-${id}`).value,
+    email: document.getElementById(`email-${id}`).value,
+    role: document.getElementById(`role-${id}`).value
+  };
+  const res = await fetch(`/users/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + jwt
+    },
+    body: JSON.stringify({ user })
+  });
+  const data = await res.json();
+  document.getElementById('user-actions').innerText = res.ok ? 'Usuário atualizado!' : JSON.stringify(data);
+  loadUsers();
+}
+
+async function deleteUser(id) {
+  const jwt = localStorage.getItem('jwt');
+  const res = await fetch(`/users/${id}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + jwt }
+  });
+  document.getElementById('user-actions').innerText = res.ok ? 'Usuário excluído!' : 'Erro ao excluir';
+  loadUsers();
+}
+
+window.onload = loadUsers;
+</script>
