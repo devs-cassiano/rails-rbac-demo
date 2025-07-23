@@ -8,7 +8,35 @@
 </table>
 <div id="user-actions"></div>
 <script>
+let currentRole = null;
+let currentUserId = null;
+
+function getJwtPayload() {
+  const jwt = localStorage.getItem('jwt');
+  if (!jwt) return null;
+  try {
+    return JSON.parse(atob(jwt.split('.')[1]));
+  } catch {
+    return null;
+  }
+}
+
+async function fetchCurrentUser() {
+  const payload = getJwtPayload();
+  if (!payload) return null;
+  currentUserId = payload.user_id;
+  const jwt = localStorage.getItem('jwt');
+  const res = await fetch(`/users/${currentUserId}`, {
+    headers: { 'Authorization': 'Bearer ' + jwt }
+  });
+  if (!res.ok) return null;
+  const user = await res.json();
+  currentRole = user.role;
+  return user;
+}
+
 async function loadUsers() {
+  await fetchCurrentUser();
   const jwt = localStorage.getItem('jwt');
   const res = await fetch('/users', {
     headers: { 'Authorization': 'Bearer ' + jwt }
@@ -22,13 +50,26 @@ async function loadUsers() {
       <td><input value="${user.name}" id="name-${user.id}"></td>
       <td><input value="${user.username}" id="username-${user.id}"></td>
       <td><input value="${user.email}" id="email-${user.id}"></td>
-      <td><input value="${user.role}" id="role-${user.id}"></td>
+      <td>${renderRoleInput(user)}</td>
       <td>
         <button onclick="updateUser(${user.id})">Atualizar</button>
+        ${canEditRole() ? `<button onclick="editRole(${user.id})">Editar Role</button>` : ''}
         <button onclick="deleteUser(${user.id})">Excluir</button>
       </td>
     </tr>`;
   });
+}
+
+function canEditRole() {
+  return currentRole === 'admin' || currentRole === 'manager';
+}
+
+function renderRoleInput(user) {
+  if (canEditRole()) {
+    return `<input value="${user.role}" id="role-${user.id}">`;
+  } else {
+    return `<input value="${user.role}" id="role-${user.id}" disabled>`;
+  }
 }
 
 async function updateUser(id) {
@@ -36,8 +77,7 @@ async function updateUser(id) {
   const user = {
     name: document.getElementById(`name-${id}`).value,
     username: document.getElementById(`username-${id}`).value,
-    email: document.getElementById(`email-${id}`).value,
-    role: document.getElementById(`role-${id}`).value
+    email: document.getElementById(`email-${id}`).value
   };
   const res = await fetch(`/users/${id}`, {
     method: 'PUT',
@@ -49,6 +89,23 @@ async function updateUser(id) {
   });
   const data = await res.json();
   document.getElementById('user-actions').innerText = res.ok ? 'Usuário atualizado!' : JSON.stringify(data);
+  loadUsers();
+}
+
+async function editRole(id) {
+  if (!canEditRole()) return;
+  const jwt = localStorage.getItem('jwt');
+  const role = document.getElementById(`role-${id}`).value;
+  const res = await fetch(`/users/${id}/update_role`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + jwt
+    },
+    body: JSON.stringify({ user: { role } })
+  });
+  const data = await res.json();
+  document.getElementById('user-actions').innerText = res.ok ? 'Role atualizada!' : JSON.stringify(data);
   loadUsers();
 }
 
