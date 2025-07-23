@@ -53,8 +53,12 @@ class UsersController < ApplicationController
 
   # DELETE /users/:id
   def destroy
-    @user.destroy
-    head :no_content
+    if current_user&.role.in?(['admin', 'manager'])
+      @user.destroy
+      head :no_content
+    else
+      render json: { error: 'Not Authorized' }, status: :forbidden
+    end
   end
 
   # PATCH /users/:id/update_role
