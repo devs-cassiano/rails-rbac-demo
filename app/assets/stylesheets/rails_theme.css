@@ -1,0 +1,93 @@
+/* rails_theme.css - Tema clássico inspirado no Rails */
+
+body {
+  background: #fafafa;
+  color: #333;
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+header, nav, footer {
+  background: #d30001;
+  color: #fff;
+  padding: 1em;
+}
+
+h1, h2, h3 {
+  color: #d30001;
+  font-weight: bold;
+}
+
+a {
+  color: #d30001;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+.button, button, input[type="submit"] {
+  background: #d30001;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5em 1.2em;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.button:hover, button:hover, input[type="submit"]:hover {
+  background: #a80000;
+}
+
+.container {
+  max-width: 900px;
+  margin: 2em auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 2em;
+}
+
+input, select, textarea {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.4em;
+  font-size: 1em;
+  margin-bottom: 1em;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+label {
+  font-weight: bold;
+  color: #d30001;
+}
+
+.flash {
+  padding: 1em;
+  margin-bottom: 1em;
+  border-radius: 4px;
+  background: #ffeaea;
+  color: #d30001;
+  border: 1px solid #d30001;
+}
+
+/* Layout básico para nav */
+nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 1em;
+}
+nav li {
+  display: inline;
+}
+
+footer {
+  text-align: center;
+  font-size: 0.9em;
+  margin-top: 2em;
+}
