@@ -63,10 +63,26 @@ class UsersController < ApplicationController
 
   # PATCH /users/:id/update_role
   def update_role
-    if @user.update(role_params)
-      render json: @user
+    # Apenas admin pode atribuir qualquer role
+    if current_user&.role == 'admin'
+      if @user.update(role_params)
+        render json: @user
+      else
+        render json: @user.errors, status: :unprocessable_entity
+      end
+    # Manager só pode atribuir 'manager' ou 'user'
+    elsif current_user&.role == 'manager'
+      if %w[user manager].include?(params[:user][:role])
+        if @user.update(role_params)
+          render json: @user
+        else
+          render json: @user.errors, status: :unprocessable_entity
+        end
+      else
+        render json: { error: 'Not Authorized' }, status: :forbidden
+      end
     else
-      render json: @user.errors, status: :unprocessable_entity
+      render json: { error: 'Not Authorized' }, status: :forbidden
     end
   end
 
